@@ -26,6 +26,7 @@ class HiddenProfiles(object):
             'ploneintranet.core:default',
             'ploneintranet.core:uninstall',
             'ploneintranet.invitations:uninstall',
+            'ploneintranet.library:uninstall',
             'ploneintranet.messaging:uninstall',
             'ploneintranet.microblog:uninstall',
             'ploneintranet.notifications:uninstall',

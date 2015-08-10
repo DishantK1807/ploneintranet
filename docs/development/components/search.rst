@@ -102,7 +102,8 @@ To register a new filter:
 Adding facets
 -------------
 
-Valid facets can be configured using the `ploneintranet.search.facet_fields` registry value. These will be returned on the `ISearchResponse` object (see below).
+Valid facets can be configured using the `ploneintranet.search.facet_fields` registry value. These will be returned on the :class:`ISearchResponse<ploneintranet.search.interfaces.ISearchResponse>` object (see below).
+
 
 .. code:: xml
 
@@ -113,10 +114,17 @@ Valid facets can be configured using the `ploneintranet.search.facet_fields` reg
       <value_type type="plone.registry.field.TextLine" />
     </field>
     <value>
-      <element>tags</element>
       <element>friendly_type_name</element>
+      <element>tags</element>
     </value>
   </record>
+
+Adding options to the site search interface
+-------------------------------------------
+
+The refinement options shown in the main search interface
+are auto-generated from any fields registered as 
+*both* a facet and a filter field (see above for adding facets/fields).
 
 Adding search fields ('phrase fields')
 --------------------------------------
@@ -163,8 +171,8 @@ To control the weighting/boosting of the phrase fields (see above), use the `plo
 
 
 
-Usage
-=====
+Using the Search Utility
+========================
 
 You can make custom calls to the search utility as follows:
 
@@ -174,14 +182,28 @@ You can make custom calls to the search utility as follows:
     from ploneintranet.search.interfaces import ISiteSearch
 
     sitesearch = getUtility(ISiteSearch)
-    sitesearch.query(phrase='My search phrase')
+    response = sitesearch.query(phrase='My search phrase')
 
-The result of the 'query' call will implement the ISearchResponse interface:
+    print 'Found {.total_results} result(s)'.format(response)
+    result_tags = response.facets.get('tags')
+
+The result of the 'query' call will implement the :class:`ISearchResponse <ploneintranet.search.interfaces.ISearchResponse>` interface:
 
 .. autointerface:: ploneintranet.search.interfaces.ISearchResponse
    :members:
 
-Iterating over the response will give an ISearchResult for each matching result:
+Iterating over the response will give an :class:`ISearchResult <ploneintranet.search.interfaces.ISearchResult>` for each matching result:
+
+.. code:: python
+
+    from zope.component import getUtility
+    from ploneintranet.search.interfaces import ISiteSearch
+
+    sitesearch = getUtility(ISiteSearch)
+    response = sitesearch.query(phrase='My search phrase')
+
+    for result in response:
+        print 'Found a {.portal_type} named {.title}'.format(result)
 
 .. autointerface:: ploneintranet.search.interfaces.ISearchResult
    :members:

@@ -68,6 +68,8 @@ setup(name='ploneintranet',
           'Celery[redis]',
           'pathlib',
           'collective.externaleditor >= 1.0.2',
+          'tablib',
+          'collective.dexteritytextindexer',
       ],
       extras_require={
           'test': [
@@ -130,7 +132,7 @@ setup(name='ploneintranet',
               'collective.indexing >= 2.0a2',
               'requests',
               'scorched',
-          ]
+          ],
       },
       entry_points="""
       # -*- Entry points: -*-

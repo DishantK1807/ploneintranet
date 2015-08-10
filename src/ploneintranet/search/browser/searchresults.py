@@ -1,3 +1,4 @@
+from plone import api
 from Products.Five import BrowserView
 from ZTUtils import make_query
 from zope.component import getUtility
@@ -6,11 +7,22 @@ from datetime import datetime
 from datetime import timedelta
 from ..interfaces import ISiteSearch
 
-SUPPORTED_FILTERS = ['friendly_type_name', 'Subject']
+from plone import api as plone_api
+
 RESULTS_PER_PAGE = 10
 
 
 class SearchResultsView(BrowserView):
+
+    # Map portal types to url fragments so that the correct sidebar
+    # section is opened
+    url_fragments = {
+        u'Document': '#workspace-documents',
+        u'Image': '#workspace-documents',
+        u'File': '#workspace-documents',
+        u'todo': '#workspace-tickets',
+        u'Event': '#workspace-events',
+    }
 
     def _daterange_from_string(self, range_name, now=None):
         """
@@ -66,11 +78,42 @@ class SearchResultsView(BrowserView):
             qs=new_query
         )
 
+    def friendly_path(self, url):
+        """Show the object path within the navigation root"""
+        root_url = api.portal.get_navigation_root(self.context).absolute_url()
+        return url.replace(root_url, '')
+
+    def preview_class(self, portal_type):
+        """Get the matching preview class for a portal type"""
+        if portal_type == 'ploneintranet.userprofile.userprofile':
+            return 'user'
+        else:
+            return 'file'
+
+    def search_options(self):
+        """Get the currently options for refining results.
+
+        These are generated from all fields registered as
+        *both* a facet field and a filter field
+        """
+        filter_names = set(plone_api.portal.get_registry_record(
+            'ploneintranet.search.filter_fields'))
+        facet_names = set(plone_api.portal.get_registry_record(
+            'ploneintranet.search.facet_fields'))
+        options = [x for x in filter_names if x in facet_names]
+        # content type is rendered separately by the UI
+        if 'friendly_type_name' in options:
+            options.remove('friendly_type_name')
+        return options
+
     def search_response(self):
         form = self.request.form
         filters = {}
         start_date = None
         end_date = None
+
+        supported_filters = plone_api.portal.get_registry_record(
+            'ploneintranet.search.filter_fields')
 
         if form.get('SearchableText'):
             # This means that the main search form was submitted,
@@ -80,7 +123,7 @@ class SearchResultsView(BrowserView):
             # This means that the filters were changed, so
             # we refine an existing search
             keywords = form.get('SearchableText_filtered')
-            for filt in SUPPORTED_FILTERS:
+            for filt in supported_filters:
                 if form.get(filt):
                     filters[filt] = form.get(filt)
             if form.get('created'):
@@ -94,7 +137,7 @@ class SearchResultsView(BrowserView):
 
         search_util = getUtility(ISiteSearch)
         response = search_util.query(
-            keywords,
+            keywords.decode('utf-8'),
             filters=filters,
             start_date=start_date,
             end_date=end_date,
@@ -125,3 +168,6 @@ class SearchResultsView(BrowserView):
 
     def search_files(self):
         return self.search_by_type('File')
+
+    def search_people(self):
+        return self.search_by_type('ploneintranet.userprofile.userprofile')

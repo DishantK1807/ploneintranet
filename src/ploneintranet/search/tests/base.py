@@ -1,6 +1,7 @@
 import abc
 import collections
 import datetime
+import transaction
 from functools import partial
 
 from plone import api
@@ -36,6 +37,15 @@ class SiteSearchContentsTestMixin(SiteSearchTestBaseMixin):
     def setUp(self):
         super(SiteSearchContentsTestMixin, self).setUp()
         container = self.layer['portal']
+
+        # Some other layer leaves behind a 'robot-test-folder'
+        # that screws up our isolation
+        if 'robot-test-folder' in container.objectIds():
+            api.content.delete(container['robot-test-folder'])
+
+        self._setup_content(container)
+
+    def _setup_content(self, container):
         self.create_doc = partial(self._create_content,
                                   type='Document',
                                   container=container,
@@ -46,9 +56,8 @@ class SiteSearchContentsTestMixin(SiteSearchTestBaseMixin):
             description=(u'This is a test document. '
                          u'Hopefully some stuff will be indexed.'),
             subject=(u'test', u'my-tag'),
-            safe_id=False
         )
-        self.doc1.creation_date = datetime.datetime(2001, 9, 11, 0, 10, 1)
+        self.doc1.modification_date = datetime.datetime(2001, 9, 11, 0, 10, 1)
 
         self.doc2 = self.create_doc(
             title=u'Test Doc 2',
@@ -56,7 +65,7 @@ class SiteSearchContentsTestMixin(SiteSearchTestBaseMixin):
                          u'Please let some stuff be indexed. '),
             subject=(u'test', u'my-other-tag'),
         )
-        self.doc2.creation_date = datetime.datetime(2002, 9, 11, 0, 10, 1)
+        self.doc2.modification_date = datetime.datetime(2002, 9, 11, 0, 10, 1)
 
         self.doc3 = self.create_doc(
             title=u'Lucid Dreaming',
@@ -65,28 +74,31 @@ class SiteSearchContentsTestMixin(SiteSearchTestBaseMixin):
                 u'which may leave the casual reader perplexed. '
                 u'Nothing to do with the weather.')
         )
-        self.doc3.creation_date = datetime.datetime(2002, 9, 11, 1, 10, 1)
+        self.doc3.modification_date = datetime.datetime(2002, 9, 11, 1, 10, 1)
 
         self.doc4 = self.create_doc(
             title=u'Weather in Wales',
             description=u'Its raining cats and dogs, usually.',
             subject=(u'trivia', u'boredom', u'british-hangups')
         )
-        self.doc4.creation_date = datetime.datetime(2002, 9, 11, 1, 10, 1)
+        self.doc4.modification_date = datetime.datetime(2002, 9, 11, 1, 10, 1)
 
         self.doc5 = self.create_doc(
             title=u'Sorted and indexed.',
             description=u'Not relevant',
             subject=(u'solr', u'boost', u'values')
         )
-        self.doc5.creation_date = datetime.datetime(1999, 01, 11, 2, 3, 8)
+        self.doc5.modification_date = datetime.datetime(1999, 01, 11, 2, 3, 8)
 
         self.doc6 = self.create_doc(
             title=u'Another relevant title',
             description=u'Is Test Doc 2 Sorted and indexed?',
             subject=(u'abra', u'cad', u'abra')
         )
-        self.doc6.creation_date = datetime.datetime(1994, 04, 05, 2, 3, 4)
+        self.doc6.modification_date = datetime.datetime(1994, 04, 05, 2, 3, 4)
+
+        # Trigger collective.indexing
+        transaction.commit()
 
 
 class SiteSearchTestsMixin(SiteSearchContentsTestMixin):
@@ -119,9 +131,6 @@ class SiteSearchTestsMixin(SiteSearchContentsTestMixin):
         verifyObject(ISiteSearch, util)
         search_response = util.query(
             'Test',
-            # Use a filter to avoid zcatalog MissingValue serialization issues
-            # due to the 'robot-test-folder' persisting in tests.
-            filters=dict(friendly_type_name='Page')
         )
         verifyObject(ISearchResponse, search_response)
         for search_result in search_response:
@@ -152,12 +161,48 @@ class SiteSearchTestsMixin(SiteSearchContentsTestMixin):
         self.assertSetEqual(response.facets['tags'], expected_facets)
         self.assertSetEqual(response.facets['friendly_type_name'], {'Page'})
 
+    def test_query_with_empty_phrase(self):
+        util = self._make_utility()
+        # Need either phrase or filter
+        with self.assertRaises(api.exc.MissingParameterError):
+            util.query()
+
+        response = util.query(filters={
+            'portal_type': 'Document',
+        })
+        self.assertEqual(len(response.facets['tags']), 11)
+        self.assertEqual(response.total_results, 6)
+
+    def test_path_query_with_empty_phrase(self):
+        portal = self.layer['portal']
+        folder1 = self._create_content(
+            type='Folder',
+            container=portal,
+            title=u'Test Folder 1',
+            description=(u'This is a test folder. '),
+            safe_id=False
+        )
+        self._setup_content(folder1)
+
+        util = self._make_utility()
+        response = util.query(
+            filters=dict(path='/plone/test-folder-1',
+                         portal_type='Document'))
+        self.assertEqual(response.total_results, 6)
+
+        response = util.query(
+            filters=dict(path='/plone',
+                         portal_type='Document'))
+        self.assertEqual(response.total_results, 12)
+
     def test_query_filter_by_friendly_type(self):
         self.image1 = self.create_doc(
             title=u'A Test image',
             type='Image',
             description=u'Info about this image',
         )
+        transaction.commit()
+
         util = self._make_utility()
         response = util.query(
             u'Test',
@@ -239,6 +284,8 @@ class SiteSearchTestsMixin(SiteSearchContentsTestMixin):
         with api.env.adopt_roles(roles=['Manager']):
             self._delete_content(self.doc2)
             self._delete_content(self.doc6)
+            transaction.commit()
+
         assert self.doc2.getId() not in self.layer['portal'].keys()
         query_check_total_results(0)
 
@@ -338,6 +385,7 @@ class SiteSearchPermissionTestsMixin(SiteSearchContentsTestMixin):
         """Does the search respect view permissions?"""
         api.content.transition(obj=self.doc2, transition='publish')
         self.doc2.reindexObject()
+        transaction.commit()
 
         testing.logout()
         util = self._make_utility()
@@ -356,6 +404,37 @@ class SiteSearchPermissionTestsMixin(SiteSearchContentsTestMixin):
 
             with api.env.adopt_roles(['Manager']):
                 api.content.transition(obj=self.doc1, transition='publish')
+                self.doc1.reindexObject()
+                transaction.commit()
 
+            response = self._query(util, 'hopefully')
+            self.assertEqual(response.total_results, 1)
+
+    def test_group_changes(self):
+        """Does the search respect group permissions?"""
+        api.group.create(groupname='TestUsers')
+        api.group.grant_roles(
+            groupname='TestUsers',
+            obj=self.doc1,
+            roles=['Owner', ],
+        )
+        self.doc1.reindexObject()
+        transaction.commit()
+
+        testing.logout()
+
+        util = self._make_utility()
+
+        with login_session(TEST_USER_1_NAME):
+            response = self._query(util, 'hopefully')
+            self.assertEqual(response.total_results, 0)
+
+        # Add user to the group - they should now doc1
+        # the item in search results
+        api.group.add_user(
+            groupname='TestUsers',
+            username=TEST_USER_1_NAME)
+
+        with login_session(TEST_USER_1_NAME):
             response = self._query(util, 'hopefully')
             self.assertEqual(response.total_results, 1)

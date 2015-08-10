@@ -16,3 +16,4 @@ Component Packages
     themeswitcher
     userprofiles
     workspace
+    case-management

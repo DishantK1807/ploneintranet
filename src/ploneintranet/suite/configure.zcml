@@ -20,7 +20,7 @@
   <include package="ploneintranet.search"/>
   <include package="ploneintranet.socialsuite"/>
   <include package="ploneintranet.socialtheme"/>
-
+  <include package="ploneintranet.library"/>
   <include package="ploneintranet.attachments"/>
   <include package="ploneintranet.invitations"/>
   <include package="ploneintranet.notifications"/>
@@ -67,6 +67,13 @@
       title="Setup testing data"
       description=""
       handler="ploneintranet.suite.setuphandlers.testing"/>
+
+  <genericsetup:importStep
+      name="ploneintranet.default"
+      title="Setup default"
+      description=""
+      handler="ploneintranet.suite.setuphandlers.default"/>
+
 
   <!-- enable microblogging on workspaces -->
   <class class="ploneintranet.workspace.workspacefolder.WorkspaceFolder">

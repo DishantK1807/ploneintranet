@@ -3,20 +3,10 @@
   i18n_domain="ploneintranet.notifications">
 
   <subscriber
-    for="..interfaces.INotifiable
-         zope.lifecycleevent.interfaces.IObjectAddedEvent"
-    handler=".base.base_handler"
-  />
+      for="ploneintranet.microblog.interfaces.IStatusUpdate
+           zope.lifecycleevent.interfaces.IObjectAddedEvent"
+      handler=".base.status_update_handler"
+      />
 
-  <subscriber
-    for="..interfaces.INotifiable
-    zope.lifecycleevent.interfaces.IObjectModifiedEvent"
-    handler=".base.base_handler"
-  />
-
-  <subscriber
-    for="..interfaces.INotifiable
-         Products.CMFCore.interfaces.IActionSucceededEvent"
-    handler=".base.base_handler" />
 
 </configure>

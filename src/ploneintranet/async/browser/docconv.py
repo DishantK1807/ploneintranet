@@ -191,7 +191,7 @@ class GenerateAttachmentThumbnail(BaseDocConvView):
                 '--output', str(self.output_dir),
                 '--pages', '1'
             ]
-            cmd_output = _parse_cmd_output(cmd)
+            cmd_output = _parse_cmd_output(cmd)  # noqa
 
         base64_img_data = []
         for image in self.output_dir.iterdir():

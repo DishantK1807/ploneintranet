@@ -10,6 +10,7 @@
 .ssh/
 .Python
 pip-selfcheck.json
+.*.sw[op]
 bin/
 develop-eggs/
 docs/Makefile
@@ -25,6 +26,7 @@ parts/
 /prototype
 release/
 src/bower_components/
+src/collective.externaleditor/
 src/collective.celery/
 src/Products.ATContentTypes/
 src/Products.CMFEditions/

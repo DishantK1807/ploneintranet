@@ -16,6 +16,18 @@
 
   <include package=".browser" />
   <include package=".content" />
+  <include package=".upgrades" />
+
+  <!-- Allow users to edit their own profiles -->
+  <adapter
+     factory=".permissions.UserProfileLocalRoleAdapter"
+     />
+
+  <utility
+      name="ploneintranet.userprofile.locations_vocabulary"
+      provides="zope.schema.interfaces.IVocabularyFactory"
+      component=".vocabularies.primaryLocationVocabulary"
+      />
 
   <genericsetup:registerProfile
       name="default"
@@ -25,6 +37,15 @@
       provides="Products.GenericSetup.interfaces.EXTENSION"
       i18n:attributes="title; description"
       />
+
+  <genericsetup:importStep
+      name="ploneintranet.userprofile.install"
+      title="Plone Intranet User Profiles: import steps"
+      description="Prepare the site for Ploneintranet users"
+      handler=".setuphandlers.on_install"
+      >
+    <depends name="typeinfo" />
+  </genericsetup:importStep>
 
   <genericsetup:registerProfile
       name="uninstall"

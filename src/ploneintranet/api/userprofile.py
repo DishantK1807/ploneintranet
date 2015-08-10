@@ -10,11 +10,6 @@ from plone.api.exc import InvalidParameterError
 
 from ploneintranet.userprofile.content.userprofile import IUserProfile
 
-AVATAR_SIZES = {
-    'profile': 200,
-    'stream': 50,
-}
-
 
 def get(username):
     """Get a Plone Intranet user profile by username
@@ -91,16 +86,9 @@ def create(
         chars = string.ascii_letters + string.digits
         password = ''.join(random.choice(chars) for x in range(12))
 
-    # Look up the profiles container; Create if none
-    try:
-        profile_container = portal.contentValues(
-            {'portal_type': "ploneintranet.userprofile.userprofilecontainer"}
-        )[0]
-    except IndexError:
-        profile_container = plone_api.content.create(
-            title="Profiles",
-            type="ploneintranet.userprofile.userprofilecontainer",
-            container=portal)
+    profile_container = portal.contentValues(
+        {'portal_type': "ploneintranet.userprofile.userprofilecontainer"}
+    )[0]
 
     if properties is None:
         # Avoids using dict as default for a keyword argument.
@@ -145,47 +133,16 @@ def create(
     return profile
 
 
-def avatar_url(username, size='stream'):
-    """Get the avatar image url for a user profile by username
+def avatar_url(username=None):
+    """Get the avatar image url for a user profile
 
     :param username: Username for which to get the avatar url
     :type username: string
-    :param size: The name of the size of image required
-    :type size: string
     :returns: absolute url for the avatar image
     :rtype: string
     """
-    if size not in AVATAR_SIZES:
-        raise InvalidParameterError(
-            "Invalid size for avatar url. Valid sizes are: {}".format(
-                AVATAR_SIZES.keys()
-            )
-        )
-
-    profile = get(username)
-    if profile is None:
-        return None
-
     portal = plone_api.portal.get()
-    imaging = plone_api.content.get_view(
-        request=portal.REQUEST,
-        context=profile,
-        name='images')
-
-    width = height = AVATAR_SIZES.get(size)
-
-    try:
-        scale = imaging.scale(
-            fieldname='portrait',
-            width=width,
-            height=height,
-            direction='down',
-        )
-    except TypeError:
-        # No image found
-        return None
-
-    if scale is not None:
-        return scale.url
-    else:
-        return None
+    return '{0}/@@avatars/{1}'.format(
+        portal.absolute_url(),
+        username,
+    )

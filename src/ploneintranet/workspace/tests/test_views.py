@@ -20,7 +20,7 @@ class BaseViewTest(BaseTestCase):
 
         self.login_as_portal_owner()
         self.workspace = api.content.create(
-            self.portal,
+            self.portal.workspaces,
             'ploneintranet.workspace.workspacefolder',
             'demo-workspace',
             title='Demo Workspace'
@@ -36,26 +36,31 @@ class TestWorkspaceSettings(BaseViewTest):
 
     def test_set_attributes(self):
         self.request.method = 'POST'
-        self.request.form = {'title': 'Settings Test',
-                             'description': 'attr write test',
-                             'calendar_visible': True,
-                             'email': 'tester@testorg.net'}
+        self.request.form = {'title': u'Settings Test',
+                             'description': u'attr write test',
+                             'calendar_visible': u'selected',
+                             'email': u'tester@testorg.net'}
         self.request['HTTP_REFERER'] = 'someurl'
         self.login_as_portal_owner()
-
         view = Sidebar(self.workspace, self.request)
-        self.assertNotEqual(self.workspace.title, 'Settings Test')
-        self.assertNotEqual(self.workspace.description, 'attr write test')
+        self.assertNotEqual(self.workspace.title, u'Settings Test')
+        self.assertNotEqual(self.workspace.description, u'attr write test')
         self.assertNotEqual(self.workspace.calendar_visible, True)
+        self.assertNotEqual(self.workspace.email, u'tester@testorg.net')
         view()
-        self.assertEqual(self.workspace.title, 'Settings Test')
-        self.assertEqual(self.workspace.description, 'attr write test')
+        self.assertEqual(self.workspace.title, u'Settings Test')
+        self.assertEqual(self.workspace.description, u'attr write test')
         self.assertEqual(self.workspace.calendar_visible, True)
+        self.assertEqual(self.workspace.email, u'tester@testorg.net')
 
+        self.request.form = {'email': u'tester2@testorg.net'}
+        # By now, request.email is also set to the above value, need
+        # to rewrite explicitly
+        self.request['email'] = u'tester2@testorg.net'
         view = SidebarSettingsAdvanced(self.workspace, self.request)
-        self.assertNotEqual(self.workspace.email, 'tester@testorg.net')
+        self.assertNotEqual(self.workspace.email, u'tester2@testorg.net')
         view()
-        self.assertEqual(self.workspace.email, 'tester@testorg.net')
+        self.assertEqual(self.workspace.email, u'tester2@testorg.net')
 
 
 class TestSelfJoin(BaseViewTest):
@@ -166,8 +171,8 @@ class TestFileUploadView(BaseViewTest):
         self.view = FileUploadView(self.workspace, self.request)
 
     def test_no_file_json(self):
-        self.request.environ['HTTP_ACCEPT'] = 'text/json'
-        self.assertEqual(self.view(), {})
+        self.request.environ['HTTP_ACCEPT'] = 'application/json'
+        self.assertEqual(self.view(), '[]')
 
     def test_no_file_html(self):
         self.request.environ['HTTP_ACCEPT'] = 'text/html'
@@ -175,7 +180,7 @@ class TestFileUploadView(BaseViewTest):
         self.assertEqual(self.request.response.getStatus(), 302)
 
     def test_upload_file_json(self):
-        self.request.environ['HTTP_ACCEPT'] = 'text/json'
+        self.request.environ['HTTP_ACCEPT'] = 'application/json'
         self.request.form = {'file': 'dummy'}
         with patch.object(BaseFileUploadView, '__call__') as mock_call:
             mock_call.return_value = '{"type": "dummy"}'

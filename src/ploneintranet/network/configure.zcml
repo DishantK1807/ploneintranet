@@ -13,7 +13,18 @@
   <include package="plone.app.discussion" />
 
   <include package=".browser" />
+  <include package=".behaviors" />
   <include file="upgrades.zcml" />
+
+  <utility
+    component=".vocabularies.PersonalizedKeywordsVocabularyFactory"
+    name="ploneintranet.network.vocabularies.Keywords"
+    />
+
+  <subscriber
+      for="plone.dexterity.interfaces.IDexterityContent
+           zope.lifecycleevent.interfaces.IObjectAddedEvent"
+      handler=".subscribers.tag_subjects"/>
 
   <genericsetup:registerProfile
       name="default"
@@ -34,9 +45,15 @@
       />
 
   <genericsetup:importStep
+      name="ploneintranet.network.setupVarious"
+      title="Plone Intranet Network: extra install steps"
+      description="Various install steps that are not handled by GS import/export handlers."
+      handler="ploneintranet.network.setuphandlers.setupVarious" />
+
+  <genericsetup:importStep
       name="ploneintranet.network.uninstall"
       title="Plone Intranet Network: uninstall steps"
       description="Various uninstall steps that are not handled by GS import/export handlers."
-      handler="ploneintranet.network.uninstall.uninstall" />
+      handler="ploneintranet.network.setuphandlers.uninstall" />
 
 </configure>

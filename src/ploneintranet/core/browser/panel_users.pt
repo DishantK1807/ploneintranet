@@ -28,7 +28,6 @@
         </form>
 
         <form id="postbox-users"
-              tal:attributes="action view/action"
               class="search-result users pat-inject pat-autosubmit"
               tal:attributes="action string:${here/absolute_url}/@@newpostbox.tile;
                               data-pat-inject string:source: #${form_id}-selected-users;; target:#${form_id}-selected-users && source: #selected-users-data;; target: #selected-users-data">
@@ -45,7 +44,7 @@
                                      checked python:user.id in view.selected_user_ids and 'checked' or ''"/>
               <a class="follow"
                 tal:define="userid user/id;
-                            avatar_img string:${portal_url}/portal_memberdata/portraits/${userid};
+                            avatar_img string:${portal_url}/@@avatars/${userid};
                             fullname python:user.getProperty('fullname')">
                 <img src="${avatar_img}" alt="${fullname}" class="avatar" />
                 <strong class="title"

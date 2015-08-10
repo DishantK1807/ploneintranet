@@ -18,68 +18,77 @@
                        name="SearchableText_filtered"
                        tal:attributes="value request/SearchableText|nothing" />
                 <fieldset class="pat-checklist"
+                      tal:condition="search_response/facets/friendly_type_name|nothing"
                       id="content-types">
                     <span class="small button-cluster">
-                    <button type="button" class="pat-button select-all">All</button>
-                    <button type="button" class="pat-button deselect-all">None</button>
+                    <button type="button" class="pat-button select-all" i18n:translate="">All</button>
+                    <button type="button" class="pat-button deselect-all" i18n:translate="">None</button>
                     </span>
-                    <legend>Content types</legend>
+                    <legend i18n:translate="">Content types</legend>
                     <!-- Only list content types in this list that are relevant for this search result. -->
                     <label
                      tal:repeat="ctype search_response/facets/friendly_type_name">
-                    <input checked type="checkbox"
-                           name="friendly_type_name:list"
-                           tal:attributes="value ctype" />
-                    <span tal:replace="ctype" />
-                    </label>
-                </fieldset>
-                <fieldset class="pat-checklist"
-                      id="tags"
-                      tal:condition="search_response/facets/tags">
-                    <span class="small button-cluster">
-                    <button type="button" class="pat-button select-all">All</button>
-                    <button type="button" class="pat-button deselect-all">None</button>
-                    </span>
-                    <legend>Tags</legend>
-                    <!-- Only list tags in this list that are relevant for this search result. -->
-                    <label
-                     tal:repeat="tag search_response/facets/tags">
-                    <input checked type="checkbox"
-                           name="tags"
-                           tal:attributes="value tag" />
-                    <span tal:replace="tag" />
+                        <input checked type="checkbox"
+                               name="friendly_type_name:list"
+                               tal:attributes="value ctype">
+                        <span tal:replace="ctype"></span>
                     </label>
                 </fieldset>
                 <label>
-                    Created
+                    <span i18n:translate="" tal:omit-tag="">Last Modified</span>
                     <select name="created" id="">
-                    <option value="">
-                        Any creation date
+                    <option value="" i18n:translate="">
+                        Any modification date
                     </option>
-                    <option value="today">
+                    <option value="today" i18n:translate="">
                         Today
                     </option>
-                    <option value="last-week">
+                    <option value="last-week" i18n:translate="">
                         Last week
                     </option>
-                    <option value="last-month">
+                    <option value="last-month" i18n:translate="">
                         Last month
                     </option>
-                    <option value="before-last-month">
+                    <option value="before-last-month" i18n:translate="">
                         Before last month
                     </option>
                     </select>
                 </label>
+		<tal:other_options
+		     repeat="option_name view/search_options">
+                <fieldset 
+		     class="pat-checklist"
+                     id="${option_name}"
+		     tal:define="facet_values
+				 search_response/facets/?option_name|nothing"
+                     tal:condition="facet_values">
+                    <span class="small button-cluster">
+                    <button type="button" class="pat-button select-all" 
+			    i18n:translate="">All</button>
+                    <button type="button" class="pat-button deselect-all" 
+			    i18n:translate="">None</button>
+                    </span>
+                    <legend i18n:translate="" tal:content="option_name/title"></legend>
+                    <!-- Only list tags in this list that are relevant for this search result. -->
+                    <label
+                     tal:repeat="value facet_values">
+                    <input checked type="checkbox"
+                           name="${option_name}"
+                           tal:attributes="value value" />
+                    <span tal:replace="value" />
+                    </label>
+                </fieldset>
+		</tal:other_options>
                 </fieldset>
             </div>
             <div class="nine columns last document-listing"
                  id="listing"
                  tal:condition="search_response">
-                <p><span tal:replace="search_response/total_results">87</span> items matched your search.</p>
+                <p><span tal:replace="search_response/total_results">87</span> <span i18n:translate="" tal:omit-tag="">items matched your search.</span></p>
                 <p class="did-you-mean"
                    tal:define="corrected search_response/spell_corrected_search"
                    tal:condition="corrected">
-                Did you mean
+                <span i18n:translate="" tal:omit-tag="">Did you mean</span>
                 <a href="@@search?SearchableText=${corrected}"
                    tal:content="corrected"></a>?
                 </p>
@@ -104,39 +113,26 @@
                     /posts/2307540960981987527368
                     </a>
                 </dd> -->
-                <!-- Next a hard coded example of a person as a search result:
-                <dt class="title">
-                    <a href="">Joan Baker</a>
-                </dt>
+
+                <tal:result repeat="result search_response">
+
+		    <!--
                 <dd class="description">
                     <a href="/joan-baker" class="preview user">
-                    <img src="/media/avatar-joan-baker.jpg" alt="" class="pat-avatar " />
-                    <h4 class="name">
-                        Joan Baker
-                    </h4>
-                    </a>
-                    <p class="fragment">
-                    Some content goes here on Joan. Adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                    <img src="/media/avatar-joan-baker.jpg" alt=""
+			 class="pat-avatar " />
+		    -->
 
-                    </p>
-                    <a href="" class="link">
-                    /people/joan-baker
-                    </a>
-                </dd> -->
-                <!-- Next generated search results of various content/mime types: -->
-                <tal:result repeat="result search_response">
                 <dt class="title">
-                    <a href="{{ result.url }}"
-                       tal:attributes="href result/url"
-                       tal:content="result/title">
-                    {{ result.title }}
+                    <a href="${result/url}${python:view.url_fragments.get(result.portal_type)}">
+                    ${result/title}
                     </a>
                 </dt>
 
                 <dd class="description">
                     <!--
                     {% if result.layout == 'event' %}
-                    <a href="{{ result.url }}" class="preview event">
+                    <a href="${result/url}${python:view.url_fragments.get(result.portal_type)}" class="preview event">
                     <time class="calendar-medium pat-auto-scale">
                         <strong class="day">16</strong>
                         <strong class="month char-count-8">September</strong>
@@ -144,21 +140,23 @@
                     </time>
                     </a>
                     {% elsif result.document_type == 'rich' %}
-                    <a href="{{ result.url }}" class="preview rich">
+                    <a href="${result/url}${python:view.url_fragments.get(result.portal_type)}" class="preview rich">
                     {{ result.excerpt }}
                     </a>
                     {% else %}
                     -->
-                    <tal:preview>
-                    <a href="{{ result.url }}"
-                       class="preview file"
-                       tal:attributes="href result/url">
-                        <img src="{{ preview.url }}"
-                         alt=""
-                         tal:attributes="src result/preview_image_url"
-                         tal:condition="result/preview_image_url" />
-                        <img src="++theme++ploneintranet.theme/generated/media/logo-pi.svg" tal:condition="not: result/preview_image_url" />
-                    </a>
+                    <tal:preview tal:define="preview_class python:
+					     view.preview_class(result.portal_type)">
+            <a href="${result/url}${python:view.url_fragments.get(result.portal_type)}"
+			   class="preview ${preview_class}">
+              <img src="${result/preview_image_url}"
+                   class="${python: preview_class == 'user' and 'pat-avatar' or ''}"
+                   alt=""
+                   tal:condition="result/preview_image_url" />
+              <img src="++theme++ploneintranet.theme/generated/media/logo-pi.svg" tal:condition="not: result/preview_image_url" />
+              <h4 class="name" tal:content="result/title" 
+                  tal:condition="python: preview_class == 'user'" />
+			</a>
                     </tal:preview>
 
 		    <tal:highlights condition="result/highlighted_summary">
@@ -173,18 +171,18 @@
 			   tal:content="result/description">
 			</p>
 		    </tal:nohighlights>
-                    <a href="{{ result.url }}" class="link"
-                       tal:attributes="href result/url"
-                       tal:content="result/path">
+                    <a href="${result/url}${python:view.url_fragments.get(result.portal_type)}" class="link"
+                       tal:content="python:view.friendly_path(result.url)">
                     {{ result.url }}
                     </a>
                 </dd>
+
                 </tal:result>
                 </dl>
 		<p tal:define="next_url python: 
 			       view.next_page_url(search_response.total_results)"
 		   tal:condition="next_url">
-		    <a href="${next_url}">More results</a>
+		    <a href="${next_url}" i18n:translate="">More results</a>
 		</p>
             </div>
             </div>

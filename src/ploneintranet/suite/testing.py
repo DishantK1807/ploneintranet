@@ -6,8 +6,11 @@ from plone.app.testing import IntegrationTesting
 from plone.app.testing import PloneSandboxLayer
 from plone.app.tiles.testing import PLONE_APP_TILES_FIXTURE
 from plone.testing import z2
+
+import collective.documentviewer
 import collective.workspace
 import collective.z3cform.chosen
+import slc.docconv
 
 import ploneintranet.suite
 import ploneintranet.microblog
@@ -17,7 +20,7 @@ import ploneintranet.messaging
 import ploneintranet.core
 import ploneintranet.microblog.statuscontainer
 import ploneintranet.search
-import ploneintranet.microblog.statuscontainer
+import ploneintranet.workspace
 
 
 class PloneIntranetSuite(PloneSandboxLayer):
@@ -35,10 +38,15 @@ class PloneIntranetSuite(PloneSandboxLayer):
         self.loadZCML(package=collective.workspace)
         z2.installProduct(app, 'collective.workspace')
 
+        self.loadZCML(package=ploneintranet.workspace)
         self.loadZCML(package=collective.z3cform.chosen)
+        self.loadZCML(package=slc.docconv)
+        self.loadZCML(package=collective.documentviewer)
 
         # plone social dependencies
         self.loadZCML(package=ploneintranet.microblog)
+        # Force microblog to disable async mode !!!
+        ploneintranet.microblog.statuscontainer.MAX_QUEUE_AGE = 0
 
         self.loadZCML(package=ploneintranet.activitystream)
         self.loadZCML(package=ploneintranet.network)
@@ -52,6 +60,10 @@ class PloneIntranetSuite(PloneSandboxLayer):
         z2.installProduct(app, 'Products.membrane')
 
         self.loadZCML(package=ploneintranet.search)
+
+        # WTF? AttributeError: 'module' object has no attribute 'startswith'
+        # import ploneintranet.library
+        # self.loadZCML(ploneintranet.library)
 
     def setUpPloneSite(self, portal):
         # setup the default workflow
