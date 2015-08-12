@@ -44,6 +44,7 @@ setup(name='ploneintranet',
           'setuptools',
           # -*- Extra requirements: -*-
           'collective.instancebehavior',
+          'collective.documentviewer',
           'requests',
           'loremipsum',
           'z3c.jbot',
