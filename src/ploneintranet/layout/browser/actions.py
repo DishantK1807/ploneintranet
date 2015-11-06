@@ -1,7 +1,12 @@
 # coding=utf-8
+from Acquisition import aq_inner
+from Acquisition import aq_parent
+from Products.CMFPlone.utils import safe_unicode
+from Products.CMFPlone import PloneMessageFactory as PMF
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from plone.app.content.browser.actions import DeleteConfirmationForm
 from ploneintranet.core import ploneintranetCoreMessageFactory as _
+from Products.statusmessages.interfaces import IStatusMessage
 from z3c.form import button
 from zope.component import getMultiAdapter
 
@@ -49,8 +54,22 @@ class PIDeleteConfirmationForm(DeleteConfirmationForm):
 
     @button.buttonAndHandler(_(u'I am sure, delete now'), name='Delete')
     def handle_delete(self, action):
-        base_handler = super(PIDeleteConfirmationForm, self).handle_delete
-        return base_handler(self, action)
+        title = safe_unicode(self.context.Title())
+        parent = aq_parent(aq_inner(self.context))
+
+        # has the context object been acquired from a place it should not have
+        # been?
+        if self.context.aq_chain == self.context.aq_inner.aq_chain:
+            parent.manage_delObjects(self.context.getId(), self.request)
+            IStatusMessage(self.request).add(
+                PMF(u'${title} has been deleted.', mapping={u'title': title}))
+        else:
+            IStatusMessage(self.request).add(
+                PMF(u'"${title}" has already been deleted',
+                    mapping={u'title': title})
+            )
+        self.request.response.setHeader('Content-Type', 'application/json')
+        self.request.response.redirect(parent.absolute_url())
 
     @button.buttonAndHandler(
         _(u'label_cancel', default=u'Cancel'), name='Cancel')
