@@ -105,7 +105,8 @@ def my_workspaces(context,
             'url': item.url,
             'activities': activities,
             'class': css_class,
-            'modified': item.modified
+            'modified': item.modified,
+            'review_state': item.context['review_state']
         })
 
     if sort_by == 'modified':

@@ -53,9 +53,11 @@ class Workspaces(BrowserView):
     def workspaces(self):
         ''' The list of my workspaces
         '''
-        return my_workspaces(self.context,
+        workspaces = my_workspaces(self.context,
                              self.request,
                              include_activities=False)
+        not_archived = [ws for ws in workspaces if ws['review_state'] != 'archived']
+        return not_archived
 
 
 class AddView(BrowserView):
