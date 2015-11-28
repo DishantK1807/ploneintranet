@@ -6,40 +6,32 @@
       metal:use-macro="context/main_template/macros/master"
       i18n:domain="ploneintranet">
 
-    <body class="view-secure sidebar-normal gh-collapsed sidebar-left-open focus-listing  generic application-contacts patterns-loaded">
+    <body class="view-secure sidebar-normal gh-collapsed sidebar-left-closed focus-listing generic application-groups">
         <metal:content fill-slot="content">
-        <div class="application page-type- workspace-type-" id="content">
-            <h1 id="workspace-name">
-                <!-- Next link is to lead to landing state of current workspace -->
-                <a href="/open-market-committee"></a>
-            </h1>
+        <div id="content">            
+            <div id="document-body" class="" tal:define="group view/group">
+                <div id="document-content">
+                    <article class="document rich person">
+                        <h1 tal:content="group/title | group/id">The board</h1>
+                        <p  tal:condition="group/description" tal:content="group/description">The board is concerned with lorem ipsum dolor sit amet.</p>
 
-            <div class="ws-baggage-handling-regulations dark-theme" id="application-body">
+                        <div class="row user-table pat-equaliser">
+                                
+                            <!-- The last anchor tag in this list should always get a class 'last' to avoid that the item will float to the right. -->
+                            <tal:repeat repeat="member group/members">
+                                <a href="/liz-baker" class="two columns"  tal:attributes="href string:${here/portal_url}/profiles/${member/id}; class string:two columns equalised ${lastcls}" tal:define="fullname python:member.getProperty('fullname') or member.id; last repeat/member/end; lastcls python:last == 1 and 'last' or ''">
+                                    <figure>
+                                        <img src="/media/avatar-liz-baker.jpg" class="pat-avatar" alt="Image of Liz Baker" tal:attributes="src string:${here/portal_url}/profiles/${member/id}/@@avatar_profile.jpg; alt string:Image of ${fullname}">
 
-                <div id="document-body" class="" tal:define="group view/group">
-                    <div id="document-content">
-                        <article class="document rich person">
-                            <h1 tal:content="group/title | group/id">The board</h1>
-                            <p tal:content="group/description">The board is concerned with lorem ipsum dolor sit amet.</p>
+                                        <figcaption tal:content="fullname">
+                                        Liz Baker
+                                        </figcaption>
+                                    </figure>
+                                </a>
+                            </tal:repeat>
 
-                            <div class="row user-table pat-equaliser">
-                                    
-                                <!-- The last anchor tag in this list should always get a class 'last' to avoid that the item will float to the right. -->
-                                <tal:repeat repeat="member group/members">
-                                    <a href="/liz-baker" class="two columns equalised"  tal:attributes="href string:${here/portal_url}/profiles/${member/id}; class string:two columns equalised ${lastcls}" tal:define="fullname python:member.getProperty('fullname'); last repeat/member/end; lastcls python:last == 1 and 'last' or ''">
-                                        <figure>
-                                            <img src="/media/avatar-liz-baker.jpg" class="pat-avatar" alt="Image of Liz Baker" tal:attributes="src string:${here/portal_url}/@@avatars/${member/id}; alt string:Image of ${fullname}">
-
-                                            <figcaption tal:content="fullname">
-                                            Liz Baker
-                                            </figcaption>
-                                        </figure>
-                                    </a>
-                                </tal:repeat>
-
-                            </div>
-                        </article>
-                    </div>
+                        </div>
+                    </article>
                 </div>
             </div>
         </div>

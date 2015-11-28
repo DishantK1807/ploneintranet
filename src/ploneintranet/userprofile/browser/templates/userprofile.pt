@@ -10,9 +10,11 @@
         <metal:content fill-slot="content"
 		       tal:define="is_me view/is_me;
                            following view/following;
-			   num_following python: len(following);
+            			   num_following python: len(following);
                            followers view/followers;
-			   num_followers python: len(followers);
+			               num_followers python: len(followers);
+                           groups view/my_groups;
+                           num_groups python: len(groups);
 			   ">
             <aside>
                 <figure class="user-portrait">
@@ -95,94 +97,115 @@
                     <a href="#person-info" i18n:translate="">Info</a>
                     <a href="#person-followers" class="link-followers" i18n:translate="">Followers <sup tal:content="num_followers" i18n:name="num_followers">12</sup></a>
                     <a href="#person-following" class="link-following" i18n:translate="">Following <sup tal:content="num_following" i18n:name="num_following">8</sup></a>
+                    <a href="#person-groups" class="link-group">Groups <sup tal:content="num_groups">XX</sup></a>
                 </nav>
                 <div class="pat-stacks">
                     <div class="activity-stream" id="person-timeline">
                         <!-- The posts and shares of the user of the currently displayed profile are shown below. -->
-			<div id="activity-stream" data-tile="./@@activitystream.tile" tal:attributes="data-tile string:${context/absolute_url}/@@activitystream.tile" ></div>
+            			<div id="activity-stream" data-tile="./@@activitystream.tile" tal:attributes="data-tile string:${context/absolute_url}/@@activitystream.tile" ></div>
                     </div>
                     <article id="person-info">
                         <tal:block condition="view/is_me">
 
-			    <a href="${context/absolute_url}/@@edit"
-			       class="pat-inject"
-			       i18n:translate=""
-			       data-pat-inject="source: #user-edit-form::element;
-						target: #person-info;
-						trigger: autoload">
-				Edit profile
-			    </a>
+            			    <a href="${context/absolute_url}/@@edit"
+            			       class="pat-inject"
+            			       i18n:translate=""
+            			       data-pat-inject="source: #user-edit-form::element;
+            						target: #person-info;
+            						trigger: autoload">
+            				Edit profile
+            			    </a>
 
                         </tal:block>
                         <tal:block condition="not:view/is_me">
                             <dl class="pat-grid-list"
-				tal:define="fields view/fields_for_display">
+                				tal:define="fields view/fields_for_display">
                                 <dt class="icon-user" i18n:translate="">
                                     Name
                                 </dt>
                                 <dd>
-				    <em class="title" tal:condition="context/person_title|nothing" tal:content="context/person_title" /> <span tal:replace="context/fullname" />
-				</dd>
-				<tal:field repeat="field fields">
+				                    <em class="title" tal:condition="context/person_title|nothing" tal:content="context/person_title" /> <span tal:replace="context/fullname" />
+                				</dd>
+				                <tal:field repeat="field fields">
                                 <dt class="${field/icon_class}" i18n:translate=""
-				    tal:content="field/label" />
+				                    tal:content="field/label" />
                                 <dd>
-				    <span tal:replace="structure field/html" />
+				                    <span tal:replace="structure field/html" />
                                 </dd>
-				</tal:field>
+                				</tal:field>
                             </dl>
-			    <article class="pat-rich"
-				     tal:condition="context/biography|nothing">
-				<p tal:content="context/biography">
-				    Some content goes here on Jeff
-				</p>
-			    </article>
+            			    <article class="pat-rich"
+            				     tal:condition="context/biography|nothing">
+                				<p tal:content="context/biography">
+                				    Some content goes here on Jeff
+                				</p>
+            			    </article>
                         </tal:block>
-
                     </article>
-		    <div id="person-followers" tal:define="users followers">
-			<div id="followers-list" class="item-selector mode-follow">
-			<!-- In this prototype, one or more user groups might be displayed in the following list, but only individual users may be listed. -->
-			<form id="followers-list-items" action="" 
-			      data-pat-inject="target: body::after" 
-			      class="search-result users pat-inject">
-			    <fieldset class="checklist pat-checklist users unchecked" 
-				      metal:define-macro="user-listing">
-				<label class="item user has-no-description unchecked" tal:repeat="user users">
-				    <input type="checkbox" name="" />
-				    <a class="follow pat-inject"
-				       data-pat-inject="source: #document-body; target: #document-body; history: record" href="${user/url}">
-					<img class="avatar" alt=""
-					     src="${user/avatar_url}" />
-					<strong class="title" tal:content="user/title">Liz Baker</strong>
-                                    </a>
-				</label>
-			    </fieldset>
-			</form>
-			</div>
-		    </div>
-		    <div id="person-following" tal:define="users following">
-			<div id="followees-list" class="item-selector mode-follow">
-			<form id="followees-list-items" action="" 
-			      data-pat-inject="target: body::after" 
-			      class="search-result users pat-inject">
-			    <fieldset class="checklist pat-checklist users unchecked">
-				<label class="item user has-no-description unchecked" tal:repeat="user users">
-				    <input type="checkbox" name="" />
-				    <a class="follow pat-inject"
-				       data-pat-inject="source: #document-body; target: #document-body; history: record" href="${user/url}">
-					<img class="avatar" alt=""
-					     src="${user/avatar_url}" />
-					<strong class="title" tal:content="user/title">Liz Baker</strong>
-                                    </a>
-				</label>
-			    </fieldset>
-			</form>
-			</div>
-		    </div>
+        		    <div id="person-followers" tal:define="users followers">
+            			<div id="followers-list" class="item-selector mode-follow">
+            			<!-- In this prototype, one or more user groups might be displayed in the following list, but only individual users may be listed. -->
+                			<form id="followers-list-items" action="" 
+                			      data-pat-inject="target: body::after" 
+                			      class="search-result users pat-inject">
+                			    <fieldset class="checklist pat-checklist users unchecked" 
+                				      metal:define-macro="user-listing">
+                    				<label class="item user has-no-description unchecked" tal:repeat="user users">
+                    				    <input type="checkbox" name="" />
+                    				    <a class="follow pat-inject"
+                    				       data-pat-inject="source: #document-body; target: #document-body; history: record" href="${user/url}">
+                        					<img class="avatar" alt=""
+                        					     src="${user/avatar_url}" />
+                    					    <strong class="title" tal:content="user/title">Liz Baker</strong>
+                                        </a>
+                    				</label>
+                			    </fieldset>
+                			</form>
+            			</div>
+		            </div>
+        		    <div id="person-following" tal:define="users following">
+		              	<div id="followees-list" class="item-selector mode-follow">
+                			<form id="followees-list-items" action="" 
+                			      data-pat-inject="target: body::after" 
+                			      class="search-result users pat-inject">
+                			    <fieldset class="checklist pat-checklist users unchecked">
+                    				<label class="item user has-no-description unchecked" tal:repeat="user users">
+                    				    <input type="checkbox" name="" />
+                    				    <a class="follow pat-inject"
+                    				       data-pat-inject="source: #document-body; target: #document-body; history: record" href="${user/url}">
+                    					    <img class="avatar" alt=""
+                    					         src="${user/avatar_url}" />
+                    					    <strong class="title" tal:content="user/title">Liz Baker</strong>
+                                        </a>
+                    				</label>
+                			    </fieldset>
+                			</form>
+			             </div>
+		            </div>
+                    <div id="person-groups" class="visible" style="display: block;">
+                        <article class="pat-rich">
+                            <p i18n:translate="">
+                                <span tal:replace="context/fullname" i18n:name="name"/> is a member of the following <span tal:replace="num_groups" i18n:name="num_groups"/> groups. 
+                            </p>
+                        </article>
+                        <div class="row user-table pat-equaliser">
+                            <a href="/lufthansa" class="two columns"
+                                tal:repeat="group groups"
+                                tal:attributes="href group/url">
+                                <figure>
+                                    <img src="/media/logos/lufthansa-boxed-mini.svg" class="pat-avatar" alt="Image of Lufthansa" tal:attributes="src group/img; alt group/title">
+                                    <figcaption>
+                                        <tal:block replace="group/title">
+                                        Lufthansa
+                                        </tal:block>
+                                        <br>(<em><tal:block replace="group/typ"/></em>)
+                                    </figcaption>
+                                </figure>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
-
         </metal:content>
     </body>
 </html>

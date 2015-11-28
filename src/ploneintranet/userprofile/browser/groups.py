@@ -17,7 +17,16 @@ class WorkspaceGroupView(BrowserView):
         g = api.group.get(groupname=gid)
         m = api.user.get_users(groupname=gid)
 
+        title = g.title or gid
+        description = g.description
+
+        if ':' in gid:
+            role, uid = gid.split(':')
+            ws = api.content.get(UID=uid)
+            title = ws.Title()
+            description = ws.Description()
+
         return dict(id=gid,
-                    title=g.title or gid,
-                    description=g.description,
+                    title=title,
+                    description=description,
                     members=m)

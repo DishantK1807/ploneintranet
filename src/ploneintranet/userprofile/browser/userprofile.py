@@ -55,6 +55,37 @@ class UserProfileView(UserProfileViewForm):
             graph.get_followers('user', self.context.username)
         )
 
+    def my_groups(self):
+        """Groups this user is member of"""
+        my_groups = plone_api.group.get_groups(username=self.context.username)
+
+        data = []
+        portal_url = plone_api.portal.get().absolute_url()
+        g_icon = '/++theme++ploneintranet.theme/generated/media/icon-group.svg'
+        # Don't show certain system groups
+        group_filter = ['Members', 'AuthenticatedUsers']
+        for group in my_groups:
+            if group.id in group_filter:
+                continue
+            if ":" in group.id and len(group.id.split(':')[1]) == 32:
+                id, uid = group.id.split(':')
+                ws = plone_api.content.get(UID=uid)
+                url = '%s/workspace-group-view?id=%s' % \
+                    (ws.absolute_url(), group.id)
+                title = ws.title
+                img = portal_url + g_icon
+                typ = ws.Type()
+            else:
+                url = self.context.absolute_url() + \
+                    '/workspace-group-view?id=' + group.id
+                title = group.title or group.id
+                img = portal_url + g_icon
+                typ = 'group'
+
+            data.append(dict(url=url, title=title, img=img, typ=typ))
+
+        return data
+
     def _user_details(self, userids):
         """Basic user details for the given userids"""
         details = []
