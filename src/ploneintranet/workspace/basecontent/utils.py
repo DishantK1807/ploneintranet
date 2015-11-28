@@ -5,7 +5,7 @@ from plone.app.textfield.value import RichTextValue
 from plone.dexterity.utils import getAdditionalSchemata
 from plone.dexterity.interfaces import IDexterityFTI
 from plone.z3cform.z2 import processInputs
-from ploneintranet.workspace.utils import sanitize_html
+from ploneintranet.workspace.html_cleaners import sanitize_html
 from z3c.form.error import MultipleErrors
 from z3c.form.interfaces import IDataConverter
 from z3c.form.interfaces import IDataManager
