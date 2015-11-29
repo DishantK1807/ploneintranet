@@ -194,11 +194,11 @@
                                 tal:attributes="href group/url">
                                 <figure>
                                     <img src="/media/logos/lufthansa-boxed-mini.svg" class="pat-avatar" alt="Image of Lufthansa" tal:attributes="src group/img; alt group/title">
-                                    <figcaption>
-                                        <tal:block replace="group/title">
+                                    <figcaption style="word-break: break-word;-webkit-hyphens: auto;-moz-hyphens: auto; hyphens: auto;">
+                                        <tal:block replace="group/title" >
                                         Lufthansa
                                         </tal:block>
-                                        <br>(<em><tal:block replace="group/typ"/></em>)
+                                        <!--br>(<em><tal:block replace="group/typ"/></em>)-->
                                     </figcaption>
                                 </figure>
                             </a>

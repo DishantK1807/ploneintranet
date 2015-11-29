@@ -8,6 +8,7 @@ from plone.app.blocks.interfaces import IBlocksTransformEnabled
 from plone import api as plone_api
 from zope.publisher.interfaces import IPublishTraverse
 
+from ploneintranet.layout.utils import shorten
 from ploneintranet.network.interfaces import INetworkTool
 from ploneintranet import api as pi_api
 from ploneintranet.userprofile.browser.forms import get_fields_for_template
@@ -82,7 +83,10 @@ class UserProfileView(UserProfileViewForm):
                 img = portal_url + g_icon
                 typ = 'group'
 
-            data.append(dict(url=url, title=title, img=img, typ=typ))
+            data.append(dict(url=url,
+                             title=shorten(title, length=30),
+                             img=img,
+                             typ=typ))
 
         return data
 
