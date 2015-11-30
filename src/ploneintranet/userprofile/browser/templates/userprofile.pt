@@ -99,7 +99,7 @@
                     <a href="#person-info" i18n:translate="">Info</a>
                     <a href="#person-followers" class="link-followers" i18n:translate="">Followers <sup tal:content="num_followers" i18n:name="num_followers">12</sup></a>
                     <a href="#person-following" class="link-following" i18n:translate="">Following <sup tal:content="num_following" i18n:name="num_following">8</sup></a>
-                    <a href="#person-groups" class="link-group">Workspaces <sup tal:content="num_workspaces">XX</sup></a>
+                    <a href="#person-groups" class="link-group"><span tal:omit-tag="" i18n:translate="">Workspaces</span> <sup tal:content="num_workspaces">XX</sup></a>
                 </nav>
                 <div class="pat-stacks simple">
                     <div class="activity-stream" id="person-timeline">
