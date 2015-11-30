@@ -111,9 +111,10 @@
 
             			    <a href="${context/absolute_url}/@@edit"
             			       class="pat-inject"
+                               id="user-edit-form"
             			       i18n:translate=""
             			       data-pat-inject="source: #user-edit-form::element;
-            						target: #person-info;
+            						target: #user-edit-form::element;
             						trigger: autoload">
             				Edit profile
             			    </a>
@@ -142,25 +143,25 @@
                 				</p>
             			    </article>
                         </tal:block>
-                            <article class="pat-rich">
-                                <p i18n:translate="">
-                                    <span tal:replace="context/fullname" i18n:name="name"/> is a member of the following <span tal:replace="num_groups" i18n:name="num_groups"/> Groups. 
-                                </p>
-                            </article>
-                            <div class="row user-table pat-equaliser">
-                                <a href="/lufthansa" class="two columns"
-                                    tal:repeat="group groups"
-                                    tal:attributes="href group/url">
-                                    <figure>
-                                        <img src="/media/logos/lufthansa-boxed-mini.svg" class="pat-avatar" alt="Image of Lufthansa" tal:attributes="src group/img; alt group/title">
-                                        <figcaption style="word-break: break-word;-webkit-hyphens: auto;-moz-hyphens: auto; hyphens: auto;">
-                                            <tal:block replace="group/title" >
-                                            Lufthansa
-                                            </tal:block>
-                                        </figcaption>
-                                    </figure>
-                                </a>
-                            </div>
+                        <article class="pat-rich">
+                            <p i18n:translate="">
+                                <span tal:replace="context/fullname" i18n:name="name"/> is a member of the following <span tal:replace="num_groups" i18n:name="num_groups"/> Groups. 
+                            </p>
+                        </article>
+                        <div class="row user-table pat-equaliser">
+                            <a href="/lufthansa" class="two columns"
+                                tal:repeat="group groups"
+                                tal:attributes="href group/url">
+                                <figure>
+                                    <img src="/media/logos/lufthansa-boxed-mini.svg" class="pat-avatar" alt="Image of Lufthansa" tal:attributes="src group/img; alt group/title">
+                                    <figcaption style="word-break: break-word;-webkit-hyphens: auto;-moz-hyphens: auto; hyphens: auto;">
+                                        <tal:block replace="group/title" >
+                                        Lufthansa
+                                        </tal:block>
+                                    </figcaption>
+                                </figure>
+                            </a>
+                        </div>
 
                     </article>
         		    <div id="person-followers" tal:define="users followers">
