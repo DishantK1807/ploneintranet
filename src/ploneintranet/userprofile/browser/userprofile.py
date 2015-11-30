@@ -71,6 +71,8 @@ class UserProfileView(UserProfileViewForm):
             if ":" in group.id and len(group.id.split(':')[1]) == 32:
                 id, uid = group.id.split(':')
                 ws = plone_api.content.get(UID=uid)
+                if ws is None:
+                    continue
                 url = '%s/workspace-group-view?id=%s' % \
                     (ws.absolute_url(), group.id)
                 title = ws.title
