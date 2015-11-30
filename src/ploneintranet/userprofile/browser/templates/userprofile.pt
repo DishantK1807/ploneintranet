@@ -99,7 +99,7 @@
                     <a href="#person-following" class="link-following" i18n:translate="">Following <sup tal:content="num_following" i18n:name="num_following">8</sup></a>
                     <a href="#person-groups" class="link-group">Groups <sup tal:content="num_groups">XX</sup></a>
                 </nav>
-                <div class="pat-stacks">
+                <div class="pat-stacks simple">
                     <div class="activity-stream" id="person-timeline">
                         <!-- The posts and shares of the user of the currently displayed profile are shown below. -->
             			<div id="activity-stream" data-tile="./@@activitystream.tile" tal:attributes="data-tile string:${context/absolute_url}/@@activitystream.tile" ></div>
