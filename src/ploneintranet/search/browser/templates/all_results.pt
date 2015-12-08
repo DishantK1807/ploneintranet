@@ -32,7 +32,7 @@
                 </fieldset>
                 <label>
                     <span i18n:translate="" tal:omit-tag="">Last Modified</span>
-                    <select name="created" id="">
+                    <select name="__modification_date" id="">
                     <option value="" i18n:translate="">
                         Any modification date
                     </option>
@@ -165,6 +165,8 @@
                        tal:content="python:view.friendly_path(result.url)">
                     {{ result.url }}
                     </a>
+
+                    <br/><em tal:content="python:result.modified  or 'nodate'" />
                 </dd>
 
                 </tal:result>

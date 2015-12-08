@@ -127,9 +127,9 @@ class SearchResultsView(BrowserView):
             for filt in supported_filters:
                 if form.get(filt):
                     filters[filt] = safe_unicode(form.get(filt))
-            if form.get('created'):
+            if form.get('__modification_date'):
                 start_date, end_date = self._daterange_from_string(
-                    form.get('created')
+                    form.get('__modification_date')
                 )
         else:
             return []
