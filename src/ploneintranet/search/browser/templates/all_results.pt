@@ -165,8 +165,6 @@
                        tal:content="python:view.friendly_path(result.url)">
                     {{ result.url }}
                     </a>
-
-                    <br/><em tal:content="python:result.modified  or 'nodate'" />
                 </dd>
 
                 </tal:result>
