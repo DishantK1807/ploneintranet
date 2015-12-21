@@ -58,5 +58,6 @@
 
   <utility provides="collective.indexing.interfaces.IIndexQueueProcessor"
            factory=".indexers.ContentIndexer" />
+
   
 </configure>
