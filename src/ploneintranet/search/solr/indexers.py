@@ -268,9 +268,6 @@ class ContentIndexer(object):
 
     def commit(self):
         self._solr.commit(waitSearcher=None, expungeDeletes=True)
-        # TODO: Too expensive to do this every time?
-        # when do we optimize (and re-build the spellcheker) ?
-        self._solr.optimize(waitSearcher=None)
 
     def index(self, obj, attributes=None):
         """Index the object.
