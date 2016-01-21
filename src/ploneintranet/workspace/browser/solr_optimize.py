@@ -1,7 +1,7 @@
 from Products.Five.browser import BrowserView
-from plone import api
-from zope.component import adapter, queryMultiAdapter, queryUtility
+from zope.component import queryUtility
 from ploneintranet.search.solr.interfaces import IConnectionConfig, IConnection
+
 
 class SolrOptimizeView(BrowserView):
     """
