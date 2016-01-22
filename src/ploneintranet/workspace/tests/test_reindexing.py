@@ -8,8 +8,7 @@ from ploneintranet.search.solr.interfaces import IConnectionConfig
 from ploneintranet.workspace.basecontent import utils
 from ploneintranet.workspace.interfaces import IWorkspaceAppFormLayer
 from ploneintranet.workspace.testing import \
-    PLONEINTRANET_WORKSPACE_INTEGRATION_TESTING, PLONEINTRANET_WORKSPACE_SOLR_TESTING
-from ploneintranet.search.solr.testing import SOLR_FIXTURE
+    PLONEINTRANET_WORKSPACE_SOLR_TESTING
 from ploneintranet.workspace.tests.base import BaseTestCase
 from zope.component import getUtility
 from zope.event import notify
@@ -22,15 +21,14 @@ import transaction
 
 TEST_FILENAME = u'test.odt'
 
+
 class TestReindexing(BaseTestCase):
     """ Test that a comma separated string of tabs is saved as a tuple of
     strings
-    """ 
+    """
     layer = PLONEINTRANET_WORKSPACE_SOLR_TESTING
 
-
     def setUp(self):
-        import pdb; pdb.set_trace()
         super(TestReindexing, self).setUp()
         alsoProvides(self.request, IWorkspaceAppFormLayer)
         workspaces = self.portal["workspaces"]
@@ -74,7 +72,7 @@ class TestReindexing(BaseTestCase):
 
     def tearDown(self):
         t = time.time() - self.startTime
-        # print running time to compare tests with and without extra reindexObject()
+        # print running time to compare tests w/ and w/o extra reindexObject()
         print "\nTime of %s: %.3f" % (self.id(), t)
         super(TestReindexing, self).tearDown()
         api.content.delete(obj=self.ws)
@@ -121,7 +119,8 @@ class TestReindexing(BaseTestCase):
         self.assertIn(u'Test File New', search_result_titles)
 
         # upload a new file (test2.odt) for the existing file object
-        open_file = open(os.path.join(os.path.dirname(__file__), 'test2.odt'), 'r')
+        open_file = open(
+            os.path.join(os.path.dirname(__file__), 'test2.odt'), 'r')
         mock_fieldstorage = MockFieldStorage(open_file, 'uploadtestfile', '')
         file_upload = FileUpload(mock_fieldstorage)
         self.request.form['file'] = file_upload
@@ -142,6 +141,7 @@ class TestReindexing(BaseTestCase):
                                     step=99999)
         search_result_titles = [res['Title'] for res in response.results]
         self.assertIn(u'Test File New', search_result_titles)
+
 
 # This class is required to instantiate the FileUpload class
 class MockFieldStorage:
