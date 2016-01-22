@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from .utils import dexterity_update
 from Acquisition import aq_inner
-# from DateTime import DateTime
 from plone import api
 from plone.app.blocks.interfaces import IBlocksTransformEnabled
 from plone.app.event.base import default_timezone
@@ -86,7 +85,6 @@ class ContentView(BrowserView):
             api.portal.show_message(
                 ' '.join(messages), request=self.request,
                 type="success")
-            context.reindexObject()
             notify(ObjectModifiedEvent(context))
 
     @property

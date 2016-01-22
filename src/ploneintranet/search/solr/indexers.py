@@ -9,6 +9,7 @@ from plone.dexterity.interfaces import IDexterityContent
 from plone.indexer import indexer
 from plone.indexer.interfaces import IIndexableObject
 from plone.rfc822.interfaces import IPrimaryFieldInfo
+from ploneintranet.async.tasks import ReindexObject
 from zope.component import adapter, queryMultiAdapter, queryUtility
 from zope.interface import implementer, Interface
 import lxml.etree as etree
@@ -61,26 +62,36 @@ class BinaryAdder(ContentAdder):
         :type data: collections.Mapping
         :returns:
         """
-        blob_data = self.blob_data
-        if blob_data is not None:
-            params = {}
-            headers = {'Content-type': data.get('content_type', 'text/plain')}
-            params['extractFormat'] = 'text'
-            params['extractOnly'] = 'true'
-            sparams = urlencode(params)
-            url = '{}update/extract?{}'.format(self.solr.conn.url, sparams)
-            try:
-                response = requests.post(url, data=blob_data, headers=headers)
-            except requests.ConnectionError as conn_err:
-                logger.exception(conn_err)
-            else:
-                tree = etree.fromstring(response.text.encode('utf-8'))
-                elems = tree.xpath('//response/str')
-                if elems:
-                    data['SearchableText'] = elems[0].text
+        if self.context.REQUEST.get('attributes') == 'SearchableText':
+            blob_data = self.blob_data
+            if blob_data is not None:
+                params = {}
+                headers = {'Content-type': data.get('content_type',
+                                                    'text/plain')}
+                params['extractFormat'] = 'text'
+                params['extractOnly'] = 'true'
+                sparams = urlencode(params)
+                url = '{}update/extract?{}'.format(self.solr.conn.url, sparams)
+                try:
+                    response = requests.post(
+                        url, data=blob_data, headers=headers)
+                except requests.ConnectionError as conn_err:
+                    logger.exception(conn_err)
                 else:
-                    logger.error(u'Failed to extract text from binary data '
-                                 u'for file upload: %r', data)
+                    tree = etree.fromstring(response.text.encode('utf-8'))
+                    elems = tree.xpath('//response/str')
+                    if elems:
+                        data['SearchableText'] = elems[0].text
+                    else:
+                        logger.error(
+                            u'Failed to extract text from binary data '
+                            u'for file upload: %r', data)
+        else:
+            logger.info("Indexing: Dispatch reindex of SearchableText async")
+            # Dispatch an async job to also reindex the blob
+            ReindexObject(self.context, self.context.REQUEST)(
+                data=dict(attributes=["SearchableText"]),
+                countdown=10)
         super(BinaryAdder, self).add(data)
 
 

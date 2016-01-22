@@ -49,11 +49,6 @@
                 .interfaces.IConnection"
            name="File"
            />
-  <adapter factory=".indexers.BinaryAdder"
-           for="plone.dexterity.interfaces.IDexterityContent
-                .interfaces.IConnection"
-           name="Image"
-           />
 
   <utility provides="collective.indexing.interfaces.IIndexQueueProcessor"
            factory=".indexers.ContentIndexer" />
