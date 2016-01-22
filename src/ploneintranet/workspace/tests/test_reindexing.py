@@ -1,23 +1,23 @@
 # coding=utf-8
+from ZPublisher.HTTPRequest import FileUpload
 from plone import api
+from plone.namedfile.file import NamedBlobFile
+from ploneintranet.search.interfaces import ISiteSearch
+from ploneintranet.search.solr.interfaces import IConnection
+from ploneintranet.search.solr.interfaces import IConnectionConfig
 from ploneintranet.workspace.basecontent import utils
 from ploneintranet.workspace.interfaces import IWorkspaceAppFormLayer
 from ploneintranet.workspace.testing import \
     PLONEINTRANET_WORKSPACE_INTEGRATION_TESTING, PLONEINTRANET_WORKSPACE_SOLR_TESTING
 from ploneintranet.search.solr.testing import SOLR_FIXTURE
 from ploneintranet.workspace.tests.base import BaseTestCase
-from zope.interface import alsoProvides
-from zope.event import notify
-from zope.lifecycleevent import ObjectModifiedEvent
-import time
-import os
-from plone.namedfile.file import NamedBlobFile
-from ploneintranet.search.interfaces import ISiteSearch
 from zope.component import getUtility
-from ZODB.FileStorage import FileIterator
-from ZPublisher.HTTPRequest import FileUpload
-from StringIO import StringIO
-from ZPublisher import HTTPRequest
+from zope.event import notify
+from zope.interface import alsoProvides
+from zope.lifecycleevent import ObjectModifiedEvent
+
+import os
+import time
 import transaction
 
 TEST_FILENAME = u'test.odt'
@@ -62,7 +62,15 @@ class TestReindexing(BaseTestCase):
             file=NamedBlobFile(data=self.filedata, filename=TEST_FILENAME),
             container=self.testfolder)
 
-        transaction.commit()
+        # This is a substitute for transaction.commit(), which causes mayhem
+        # somewhere deeper in the test setup.
+        # If I call transaction.commit() here, then the workspace container
+        # created in BaseTestCase.setUp() reappears after being deleted in
+        # BaseTestCase.tearDown(). This goes on to cause an error when
+        # the setUp() method tries to re-create the workspace container for the
+        # next test
+        conn = IConnection(getUtility(IConnectionConfig))
+        conn.commit()
 
     def tearDown(self):
         t = time.time() - self.startTime

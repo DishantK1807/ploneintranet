@@ -30,6 +30,10 @@ class BaseTestCase(unittest.TestCase):
         )
         self.request = self.portal.REQUEST
 
+    def tearDown(self):
+        api.content.delete(obj=self.workspace_container)
+        del self.workspace_container
+
     def login(self, username):
         """
         helper method to login as specific user
