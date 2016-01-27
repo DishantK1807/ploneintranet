@@ -1,5 +1,6 @@
 # coding=utf-8
 from ZPublisher.HTTPRequest import FileUpload
+from collective.indexing.queue import processQueue
 from plone import api
 from plone.namedfile.file import NamedBlobFile
 from ploneintranet.search.interfaces import ISiteSearch
@@ -17,7 +18,6 @@ from zope.lifecycleevent import ObjectModifiedEvent
 
 import os
 import time
-import transaction
 
 TEST_FILENAME = u'test.odt'
 
@@ -49,6 +49,7 @@ class TestReindexing(BaseTestCase):
         ff = open(os.path.join(os.path.dirname(__file__), TEST_FILENAME), 'r')
         self.filedata = ff.read()
         ff.close()
+
         self.testfolder = api.content.create(
             type='Folder',
             title=u"Testfolder",
@@ -60,15 +61,19 @@ class TestReindexing(BaseTestCase):
             file=NamedBlobFile(data=self.filedata, filename=TEST_FILENAME),
             container=self.testfolder)
 
+        self.testfile.REQUEST['attributes'] = 'SearchableText'
+        self.testfile.REQUEST.environ['HTTP_X_FORWARDED_HOST'] = 'localhost'
+
         # This is a substitute for transaction.commit(), which causes mayhem
         # somewhere deeper in the test setup.
         # If I call transaction.commit() here, then the workspace container
         # created in BaseTestCase.setUp() reappears after being deleted in
         # BaseTestCase.tearDown(). This goes on to cause an error when
         # the setUp() method tries to re-create the workspace container for the
-        # next test
-        conn = IConnection(getUtility(IConnectionConfig))
-        conn.commit()
+        # next test.
+        processQueue()
+        self.conn = IConnection(getUtility(IConnectionConfig))
+        self.conn.commit()
 
     def tearDown(self):
         t = time.time() - self.startTime
@@ -102,14 +107,20 @@ class TestReindexing(BaseTestCase):
         brain = self.portal.portal_catalog.searchResults(UID=uid)[0]
         self.assertEqual(u'New Title', brain.Title)
 
+    # This tests if the searchable text gets reindexed correctly.
+    # However it DOES NOT test asynchronous reindexing, instead
+    # it bypasses async, because the following is set in the setUp method:
+    # self.testfile.REQUEST['attributes'] = 'SearchableText'
     def test_obj_reindex_searchable_text(self):
         """Set multiple tags on an object as a comma separated string and
         verify that they are saved as a tuple of strings."""
         self.request.form['title'] = u'Test File New'
         utils.dexterity_update(self.testfile, self.request)
+
         notify(ObjectModifiedEvent(self.testfile))
+        processQueue()
+        self.conn.commit()
         self.assertEqual(u'Test File New', self.testfile.title)
-        transaction.commit()
 
         # solr query for a string contained in test.odt
         sitesearch = getUtility(ISiteSearch)
@@ -123,10 +134,12 @@ class TestReindexing(BaseTestCase):
             os.path.join(os.path.dirname(__file__), 'test2.odt'), 'r')
         mock_fieldstorage = MockFieldStorage(open_file, 'uploadtestfile', '')
         file_upload = FileUpload(mock_fieldstorage)
-        self.request.form['file'] = file_upload
-        utils.dexterity_update(self.testfile, self.request)
+        self.testfile.REQUEST.form['file'] = file_upload
+        utils.dexterity_update(self.testfile, self.testfile.REQUEST)
+
         notify(ObjectModifiedEvent(self.testfile))
-        transaction.commit()
+        processQueue()
+        self.conn.commit()
 
         # solr query for a string contained in test.odt
         sitesearch = getUtility(ISiteSearch)

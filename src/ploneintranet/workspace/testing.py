@@ -10,6 +10,7 @@ from plone.app.testing import PloneSandboxLayer
 from plone.app.testing import applyProfile
 from plone.app.tiles.testing import PLONE_APP_TILES_FIXTURE
 from plone.testing import z2
+from ploneintranet.async.testing import FIXTURE as ASYNC_FIXTURE
 from ploneintranet.search.solr.testing import FIXTURE as PI_SOLR_FIXTURE
 from zope.configuration import xmlconfig
 
@@ -144,6 +145,6 @@ PLONEINTRANET_WORKSPACE_ROBOT_TESTING = FunctionalTesting(
     name="PLONEINTRANET_WORKSPACE_ROBOT")
 
 PLONEINTRANET_WORKSPACE_SOLR_TESTING = IntegrationTesting(
-    bases=(PLONEINTRANET_WORKSPACE_FIXTURE, PI_SOLR_FIXTURE),
+    bases=(PLONEINTRANET_WORKSPACE_FIXTURE, PI_SOLR_FIXTURE, ASYNC_FIXTURE),
     name="PloneintranetworkspaceSolrLayer:Integration"
 )
