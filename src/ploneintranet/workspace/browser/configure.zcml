@@ -40,15 +40,6 @@
       />
 
   <browser:page
-      name="solr-optimize"
-      for="*"
-      class=".solr_optimize.SolrOptimizeView"
-      permission="cmf.AddPortalContent"
-      template="templates/solr_optimize.pt"
-      layer="..interfaces.IPloneintranetWorkspaceLayer"
-      />
-
-  <browser:page
       name="view"
       for="ploneintranet.workspace.workspacefolder.IWorkspaceFolder"
       class=".workspace.WorkspaceView"
