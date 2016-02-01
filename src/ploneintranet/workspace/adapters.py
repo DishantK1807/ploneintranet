@@ -170,16 +170,24 @@ class MetroMap(object):
         transitions between them.
 
         Return the workflow required to render the metromap.
+
+        NOTE: is it really this hard to get the workflow for an obj?
         """
         policy_conf = self.context.get(WorkflowPolicyConfig_id)
         if policy_conf is None:
             return
         policy = policy_conf.getPolicyIn()
-        policy_id = policy.getId()
-        wft = api.portal.get_tool('portal_workflow')
-        workflow = wft.getWorkflowById(policy_id)
-        if workflow and workflow.variables.get("metromap_transitions", False):
-            return workflow
+        if policy is None:
+            return
+        chain = policy.getChainFor(self.context)
+        if chain is None:
+            chain = policy.getDefaultChain(self.context)
+        if chain is not None:
+            wft = api.portal.get_tool('portal_workflow')
+            for wf_id in chain:
+                workflow = wft.getWorkflowById(wf_id)
+                if workflow and workflow.variables.get("metromap_transitions", False):
+                    return workflow
 
     def get_available_metromap_workflows(self):
         """Return all globally available workflows with the
