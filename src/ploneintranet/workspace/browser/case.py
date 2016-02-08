@@ -4,7 +4,6 @@ from plone.memoize.view import memoize
 
 from ploneintranet.workspace.interfaces import IMetroMap
 from ploneintranet.workspace.browser.workspace import WorkspaceView
-from ploneintranet.workspace.config import TRANSITION_ICONS
 from ploneintranet.workspace.utils import parent_workspace
 
 
@@ -39,6 +38,15 @@ class CaseView(WorkspaceView):
             if not tasks[milestone_id]:
                 state = 'finished'
         return state
+
+    @property
+    def transition_icons(self):
+        context = self.context
+        workflow = IMetroMap(context)._metromap_workflow
+        if 'transition_icons' in workflow.variables:
+            return workflow.getInfoFor(context, 'transition_icons', {})
+        else:
+            return {}
 
 
 class CaseWorkflowGuardView(BrowserView):

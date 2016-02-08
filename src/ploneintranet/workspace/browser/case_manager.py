@@ -4,7 +4,6 @@ from Products.CMFPlone.PloneBatch import Batch
 from plone import api
 from ploneintranet.search.interfaces import ISearchResponse
 from ploneintranet.search.interfaces import ISiteSearch
-from ploneintranet.workspace.config import TRANSITION_ICONS
 from ploneintranet.workspace.interfaces import IMetroMap
 from zope.component import getUtility
 from zope.publisher.browser import BrowserView
@@ -39,8 +38,6 @@ def percent_complete(task_details):
 
 
 class CaseManagerView(BrowserView):
-
-    transition_icons = TRANSITION_ICONS
 
     def cases(self):
         pc = api.portal.get_tool('portal_catalog')

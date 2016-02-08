@@ -320,7 +320,6 @@ class Sidebar(BaseTile):
         if self.request.method == 'POST' and form:
             ws = self.workspace()
             self.set_grouping_cookie()
-            # wft = api.portal.get_tool("portal_workflow")
             section = self.request.form.get('section', None)
             do_reindex = False
 
