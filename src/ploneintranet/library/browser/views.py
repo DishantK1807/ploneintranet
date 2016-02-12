@@ -88,11 +88,11 @@ class LibraryBaseView(BrowserView):
     def sections(self):
         """Return toplevel section navigation"""
         app = self.app()
-        sections = app.objectValues()
+        sections = app.getFolderContents()
         current_url = self.request['ACTUAL_URL']
         current_nav = app
         for s in sections:
-            if current_url.startswith(s.absolute_url()):
+            if current_url.startswith(s.getURL()):
                 current_nav = s
                 break
 
@@ -104,7 +104,7 @@ class LibraryBaseView(BrowserView):
         for s in sections:
             s_current = (s == current_nav) and 'current' or ''
             menu.append(dict(title=s.Title,
-                             absolute_url=s.absolute_url(),
+                             absolute_url=s.getURL(),
                              current=s_current))
         return menu
 
