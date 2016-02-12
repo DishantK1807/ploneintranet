@@ -571,6 +571,8 @@ def create_caseworkspaces(caseworkspaces,
         contents = w.pop('contents', None)
         members = w.pop('members', [])
         state = w.pop('state', None)
+        if w['id'] in ws_folder:
+            continue
         caseworkspace = api.content.create(
             container=ws_folder,
             type='ploneintranet.workspace.case',
